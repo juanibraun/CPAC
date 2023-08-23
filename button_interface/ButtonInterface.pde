@@ -151,7 +151,7 @@ public void buttonEb(int theValue) {
 public void buttonE(int theValue) {
   println("a button event from buttonE: "+theValue);
   OscMessage myMessage = new OscMessage("/adress");
-  myMessage.add("italia");
+  myMessage.add("italy");
   myMessage.add("urban");
   oscP5.send(myMessage, myRemoteLocation);
   println("a button event from buttonE: "+theValue);
@@ -161,7 +161,7 @@ public void buttonE(int theValue) {
 public void buttonF(int theValue) {
   println("a button event from buttonF: "+theValue);
   OscMessage myMessage = new OscMessage("/adress");
-  myMessage.add("italia");
+  myMessage.add("italy");
   myMessage.add("rural");
   oscP5.send(myMessage, myRemoteLocation);
   println("a button event from buttonF: "+theValue);
