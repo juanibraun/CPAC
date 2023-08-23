@@ -5,7 +5,11 @@ import netP5.*;
 ControlP5 cp5;
 Button[] buttons;
 PFont font;
-color[] colors = {color(255, 0, 0), color(144, 0, 255) , color(255, 255, 0), color(183, 70, 139), color(195, 242, 255), color(171, 0, 52), color(127, 139, 253), color(255, 127, 0), color(187, 117, 252), color(51, 204, 51), color(169, 103, 124), color(142, 201, 255)};
+PFont fontTit;
+PFont fontText;
+PImage[] img; 
+
+color[] colors = {color(255, 0, 0), color(144, 0, 255) , color(142, 201, 255), color(183, 70, 139), color(195, 242, 255), color(171, 0, 52), color(127, 139, 253), color(255, 127, 0), color(187, 117, 252), color(51, 204, 51), color(169, 103, 124), color(142, 201, 255)};
 color highlight; //color for the button when it is highlighted
 color buttColor;
 color fontColor;
@@ -25,14 +29,28 @@ void setup(){
   buttons = new Button[numButtons];
   cp5 = new ControlP5(this);
   
-  font = createFont("arial", 20);
+  int numImages;
+  numImages = 6;
+  img = new PImage[numImages];
+  img[0] = loadImage("Uruguayflag.png");
+  img[1] = loadImage("Uruguayflag.png");
+  img[2] = loadImage("spainflag.png");
+  img[3] = loadImage("spainflag.png");
+  img[4] = loadImage("italia.png");
+  img[5] = loadImage("italia.png");
+
+  
+  //font = createFont("arial", 20);
   font = loadFont("MalgunGothic-Semilight-20.vlw");
+  fontText = loadFont("MalgunGothic-Semilight-30.vlw");
+  fontTit = loadFont("MalgunGothicBold-40.vlw");
+  //fontTit = loadFont("MVBoli-40.vlw");
   //fontTit = createFont("MalgunGothic Semilight", 25);
   String[] names = {"buttonC", "buttonDb", "buttonD", "buttonEb", "buttonE", "buttonF"}; //, "buttonGb", "buttonG", "buttonAb", "buttonA", "buttonBb", "buttonB"};
   String[] labels = {"Urban population", "Rural Population", "Urban population", "Rural Population", "Urban population", "Rural Population"}; //, "Gb", "G", "Ab", "A", "Bb", "B"};
   
   for (int i=0; i<buttons.length; i++){
-    buttons[i] = cp5.addButton(names[i]).setPosition(475, 50 + i*50).setSize(220, 50).setColorBackground(buttColor).setCaptionLabel(labels[i]).setFont(font).setColorForeground(highlight).setColorActive(colors[i]);
+    buttons[i] = cp5.addButton(names[i]).setPosition(475, 65 + i*75).setSize(220, 50).setColorBackground(buttColor).setCaptionLabel(labels[i]).setFont(font).setColorForeground(highlight).setColorActive(colors[i]);
   }
   
   oscP5 = new OscP5(this,1234);
@@ -51,19 +69,23 @@ void draw(){
     //println("check11");
     buttons[i].getCaptionLabel().setColor(color(0));
     background(colors[i]);
+    image(img[i], width/2, height/2);
     } else {
       buttons[i].getCaptionLabel().setColor(color(255));
     }
   }
   
-   font = loadFont("MalgunGothic-Semilight-20.vlw");
-  textFont(font, 30); //si no textFont(font) tb deberia servir
+   //font = loadFont("MalgunGothic-Semilight-20.vlw");
+  textFont(fontText, 30); //si no textFont(font) tb deberia servir
   //textSize(25);
   fill (0, 0, 0);
-  text("URUGUAY", 300, 100); // Text + cord x + cord y
-  text("SPAIN", 300, 300); // Text + cord x + cord y
-  text("ITALY", 300, 400); // Text + cord x + cord y
+  text("URUGUAY", 300, 140); // Text + cord x + cord y
+  text("SPAIN", 330, 290); // Text + cord x + cord y
+  text("ITALY", 330, 440); // Text + cord x + cord y
   
+  textFont(fontTit);
+  //text("POP-draw", 60, 70);
+  text("POP-draw", 60, 590);
 }
 
 
