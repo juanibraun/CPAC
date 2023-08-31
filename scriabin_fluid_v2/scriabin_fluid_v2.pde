@@ -50,11 +50,11 @@ float diffusion;
 float viscosity;
 
 void settings() {
-  //size(720,880); 
-  //N1 = width/SCALE; //<>// //<>//
+  //size(720,880,P3D); 
+  //N1 = width/SCALE; //<>//
   //N2 = height/SCALE;
   
-  fullScreen();
+  fullScreen(P3D);
   N1 = displayWidth/SCALE;
   N2 = displayHeight/SCALE;
 }
@@ -70,7 +70,7 @@ void setup() {
   oscillator = new TriOsc(this);
   env  = new Env(this); 
  
-  camOn = true;
+  camOn = false;
   cam = new Capture(this,width,height);
   cam.start();
   
@@ -83,6 +83,13 @@ void setup() {
   
   angle_offset = 0;
   radio = 0.3;
+  
+  float fov = PI/3.0;
+  float cameraZ = (height/2.0) / tan(fov/2.0);
+  perspective(fov, float(width)/float(height), 
+            cameraZ/10.0, cameraZ*10.0);
+            
+            
 }
 
 void captureEvent(Capture video) {
@@ -194,7 +201,8 @@ void oscEvent(OscMessage theOscMessage) {
     
   if (theOscMessage.checkAddrPattern("/viscosity"))
   {
-    viscosity = pow(10,-theOscMessage.get(0).floatValue()-2);
+    viscosity = pow(10,-theOscMessage.get(0).floatValue()-3);
+    fluid.changeViscosity(viscosity);
     
     //notes[pc].isFinished=true;
     println("visc:", viscosity);
@@ -202,11 +210,17 @@ void oscEvent(OscMessage theOscMessage) {
     
   if (theOscMessage.checkAddrPattern("/diffusion"))
   {
-    diffusion = pow(10,-theOscMessage.get(0).floatValue()-2);
-    
+    diffusion = pow(10,2-theOscMessage.get(0).floatValue());
+    fluid.changeDiffusion(diffusion);
     //notes[pc].isFinished=true;
     println("diff:", diffusion);
     }
+    
+  if (theOscMessage.checkAddrPattern("/reset"))
+  {
+    if(theOscMessage.get(0).floatValue()==1) fluid.resetGrid();
+
+  }
     
 }
 

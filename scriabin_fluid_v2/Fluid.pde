@@ -99,6 +99,30 @@ class Fluid {
   
   }
   
+  void resetGrid(){
+    for (int i = 0; i < N1; i++){
+      for (int j = 0; j < N2; j++){
+         PVector p = new PVector(i-N1/2, N2/2-j);
+         PVector r = new PVector(0, 1); 
+         //float rad = (TWO_PI-atan2(cy-j,cx-i))%TWO_PI;
+         float rad;
+         if (i <= N1/2 - 10){
+           rad = TWO_PI - PVector.angleBetween(p, r);
+           this.hue[IX(i,j)] = degrees(rad%TWO_PI);
+         }else if (i > N1/2 - 10){
+           rad = PVector.angleBetween(r, p);
+           this.hue[IX(i,j)] = degrees(rad%TWO_PI);
+         }else{
+           this.hue[IX(i,j)] = 0;
+         }
+
+         this.sat[IX(i,j)] = 0;
+         this.bright[IX(i,j)] = 100;
+         this.density[IX(i,j)] = 0;  
+      }
+    }
+  }
+  
   void setNote(int x, int y, float[] amount){
     int index= IX(x, y);
     this.density[index] = amount[0];
@@ -322,11 +346,19 @@ void renderD(){
         float x = i * SCALE;
         float y = j * SCALE;
         
-        float v = map(this.density[IX(i,j)],0,127,0,6);
+        float v = map(this.density[IX(i,j)],0,127,0,2);
         colorMode(HSB,360,100,100);
+        
+        pushMatrix();
+        translate(x, y, v*SCALE); 
+        box(v*SCALE);
         fill(this.hue[IX(i,j)],this.sat[IX(i,j)],this.bright[IX(i,j)]);
         noStroke();
-        square(x,y,SCALE*v);
+        popMatrix();
+        
+        
+        
+        //square(x,y,SCALE*v);
         //ellipse(x,y,SCALE*v,SCALE*v);
       }
     }
