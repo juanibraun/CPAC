@@ -94,7 +94,7 @@ class Fluid {
          */
          
       }
-      //println("next"); //<>// //<>//
+      //println("next");
     }
   
   }
@@ -141,12 +141,12 @@ class Fluid {
   
   void changeDiffusion(float amount){
     
-    this.diff = amount;
+    this.diff *= amount;
   }
   
   void changeViscosity(float amount){
     
-    this.visc = amount;
+    this.visc *= amount;
   }
   
   
@@ -290,7 +290,7 @@ class Fluid {
     float[] past_sat = this.past_sat;
     float[] hue     = this.hue;
     float[] past_hue = this.past_hue;   
-    float[] bright     = this.bright;  //<>//
+    float[] bright     = this.bright;
     float[] past_bright = this.past_bright;   
 
     diffuse(1, Vx0, Vx, visc, dt);
@@ -322,12 +322,12 @@ void renderD(){
         float x = i * SCALE;
         float y = j * SCALE;
         
-        float v = map(this.density[IX(i,j)],0,127,0,6);
+        float v = map(this.density[IX(i,j)],0,127,0,3);
         colorMode(HSB,360,100,100);
         fill(this.hue[IX(i,j)],this.sat[IX(i,j)],this.bright[IX(i,j)]);
         noStroke();
-        square(x,y,SCALE*v);
         //ellipse(x,y,SCALE*v,SCALE*v);
+        square(x,y,SCALE*v);
       }
     }
   }
