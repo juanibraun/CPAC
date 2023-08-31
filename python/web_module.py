@@ -229,8 +229,8 @@ port = 5005
 server = BlockingOSCUDPServer((ip, port), dispatcher)
 
 # UTC client sender 
-# ip_s = "127.0.0.1"
-ip_s = "172.20.10.4"  #ip Juans red
+ip_s = "127.0.0.1"
+# ip_s = "172.20.10.4"  #ip Juans red
 port_s = 7772
 client_s = SimpleUDPClient(ip_s, port_s)  # Create client
 
