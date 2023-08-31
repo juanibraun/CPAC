@@ -84,8 +84,8 @@ void draw(){
   text("ITALY", 330, 440); // Text + cord x + cord y
   
   textFont(fontTit);
-  //text("POP-draw", 60, 70);
-  text("POP-draw", 60, 590);
+  //text("Scriba'N Paint", 60, 70);
+  text("Scriba'N Paint", 60, 590);
 }
 
 

@@ -30,16 +30,18 @@ def note_variation(
     ratio = population / reference
     if population > reference:
         if original_note != 0:
-            modified_note = int(original_note * ratio)
+            """modified_note = int(original_note * ratio)
             modified_note = modified_note if modified_note > -1 else 0
-            modified_note = modified_note if modified_note < 128 else 127
+            modified_note = modified_note if modified_note < 128 else 127"""
+            modified_note = original_note
         modified_duration  = int(original_duration - (original_duration**ratio) / 3)
         modified_duration = modified_duration if modified_duration > 0 else 0
     else:
         if original_note != 0:
-            modified_note = int(original_note * ratio)
+            """modified_note = int(original_note * ratio)
             modified_note = modified_note if modified_note > -1 else 0
-            modified_note = modified_note if modified_note < 128 else 127
+            modified_note = modified_note if modified_note < 128 else 127"""
+            modified_note=original_note
         modified_duration  = int(original_duration + (original_duration**ratio) / 3)
     modified_duration = modified_duration if modified_duration > 0 else 0
     print(modified_note)
@@ -227,7 +229,8 @@ port = 5005
 server = BlockingOSCUDPServer((ip, port), dispatcher)
 
 # UTC client sender 
-ip_s = "127.0.0.1"
+# ip_s = "127.0.0.1"
+ip_s = "172.20.10.4"  #ip Juans red
 port_s = 7772
 client_s = SimpleUDPClient(ip_s, port_s)  # Create client
 
