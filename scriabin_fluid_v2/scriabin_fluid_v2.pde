@@ -11,7 +11,16 @@ Fluid fluid;
 OscP5 oscP5;
 UDP udp;
 
-SinOsc oscillator;
+// Oscillator setup
+TriOsc oscillator;
+Env env;
+
+float attackTime = 0.001;
+float sustainTime = 0.004;
+float sustainLevel = 0.3;
+float releaseTime = 0.4;
+
+
 String type;
 int channel;
 int note;
@@ -19,43 +28,61 @@ float vel;
 int duration;
 
 
-//int[] pixtwo = new int [width*height];
-float[] note2hue = {0,287,60,7,195,3,271,40,284,120,206,240};
-float[] note2sat = {100,31,100,23,100,61,81,100,51,100,19,100};
-float[] note2bright = {100,74,100,100,100,73,88,100,82,100,60,100};
-float[] note2angle = {PI/2, 4*PI/3, PI/6, PI, 11*PI/6, 2*PI/3, 3*PI/2, PI/3, 7*PI/6, 0, 5*PI/6, 5*PI/3}; 
+// Scriabin color values;
+float[] note2hue = {0,270,60,340,190,355,230,40,280,130,350,210};
+float[] note2sat = {100,60,100,60,40,100,45,100,34,75,50,70};
+float[] note2bright = {100,100,100,100,100,60,100,100,100,80,80,100};
+float[] note2angle = {PI/2, 8*PI/6, PI/6, PI, 11*PI/6, 4*PI/6, 9*PI/6, 2*PI/6, 7*PI/6, 0, 5*PI/6, 10*PI/6}; 
 
+// Camera setup
 Capture cam;
 int index_cam=0;
 
+// Scale of grid
+int SCALE = 12;
+int N1 = 60;
+int N2 = 60;
+
+boolean camOn;
+float radio;
+float angle_offset;
+float diffusion;
+float viscosity;
 
 void settings() {
-  size(N*SCALE,N*SCALE); 
-  //fullScreen();
+  //size(720,880); 
+  //N1 = width/SCALE; //<>//
+  //N2 = height/SCALE;
+  
+  fullScreen();
+  N1 = displayWidth/SCALE;
+  N2 = displayHeight/SCALE;
 }
 
 void setup() {
-  fluid = new Fluid(0.1,0.0000001,0.000001);
+  
+  // communication init
   oscP5 = new OscP5(this,7771);
   udp = new UDP(this, 7772);
   udp.listen(true);
-  // Sound setup
-  oscillator = new SinOsc(this);
- //Camera setup
-  String[] cameras = Capture.list();
-  if (cameras.length == 0) {
-    println("There are no cameras available for capture.");
-    exit();
-  } else {
-    println("Available cameras:");
-    for (int i = 0; i < cameras.length; i++) {
-      println(i, cameras[i]);
-    }
-    cam = new Capture(this, cameras[index_cam]);
-    cam.start();
-    }
+  
+  // oscillator init
+  oscillator = new TriOsc(this);
+  env  = new Env(this); 
+ 
+  camOn = true;
+  cam = new Capture(this,width,height);
+  cam.start();
   
   frameRate(60);
+  
+  
+  // Fluid init
+  fluid = new Fluid(0.1,1e-14,1e-10);
+  colorMode(HSB,360,100,100);
+  
+  angle_offset = 0;
+  radio = 0.3;
 }
 
 void captureEvent(Capture video) {
@@ -63,30 +90,55 @@ void captureEvent(Capture video) {
 }
 
 void draw() {
-  background(0,100,100);
-  image(cam, 0, 0,width, height);
+  if(camOn) {
+    image(cam, 0, 0,width, height);
+  }
+  else{
+    background(0,0,0);
+  }
   
-  int cx = int(0.5*width/SCALE)+int(0.2*width/SCALE*cos(note2angle[note % 12]+PI));
-  int cy = int(0.5*height/SCALE)+int(0.2*height/SCALE*sin(note2angle[note % 12]+PI));
+  // draw frame
+  
+  int marco = 30; //frame widht
+  
+  fill(255,0,100);
+  quad(0, 0, marco/2, marco/2, marco/2, height - marco/2, 0, height);
+  quad(0, 0, width, 0, width - marco/2, marco/2, marco/2, marco/2);
+  quad(width, height, 0, height, marco/2, height - marco/2, width - marco/2, height - marco/2);
+  quad(width, 0, width, height, width - marco/2, height - marco/2, width - marco/2, marco/2);
+  
+  fill(255,0,70);
+  quad(marco/2, marco/2, 2*marco, 2*marco, 2*marco, height - 2*marco, marco/2, height - marco/2);
+  fill(255,0,85);
+  quad(marco/2, marco/2, width - marco/2, marco/2, width - 2*marco, 2*marco, 2*marco, 2*marco);
+  quad(width - marco/2, height - marco/2, marco/2, height - marco/2, 2*marco, height - 2*marco, width - 2*marco, height - 2*marco);
+  fill(255,0,80);
+  quad(width - marco/2, marco/2, width - marco/2, height - marco/2, width - 2*marco, height - 2*marco, width - 2*marco, 2*marco);
+  
+  
+  // get position in the canvas to insert fluid, this is taken from note value
+  PVector c = PVector.fromAngle(note2angle[note % 12] + radians(angle_offset));
+  int cx = int((0.5 + radio * c.x)*width/SCALE);
+  int cy = int((0.5 - radio * c.y)*height/SCALE);
   float[]  amount = {vel, note2sat[note % 12],note2hue[note % 12],note2bright[note % 12]};
+  PVector v = PVector.fromAngle(note2angle[note % 12]  + radians(angle_offset));
+  
 
+  
+  // insert fluid
   for (int i = -1; i <= 1; i++){
     for (int j = -1; j <= 1; j++){
-      //fluid.addDensity(cx+i,cy+j,note2sat[note % 12]);
-      //fluid.addHue(cx+i,cy+j,note2hue[note % 12]);
-      //fluid.addBright(cx+i,cy+j,note2bright[note % 12]);
       fluid.setNote(cx+i,cy+j,amount);
+      fluid.addVelocity(cx+i, cy+j, i*j*v.x, i*-j*v.y);
     }
   }
   //println(note2angle[note % 12]);
-  PVector v = PVector.fromAngle(note2angle[note % 12]+PI);
-  //println(v);
-  v.mult(1.5);
-  t += 0.01;
-  fluid.addVelocity(cx, cy, -v.x, -v.y); 
+
+  // evolve fluid
   fluid.step();
-  fluid.renderD();
+  fluid.renderD(); //<>//
   fluid.fadeD();
+  
 }
 
 float midiToFreq(int midiNote) {
@@ -117,6 +169,44 @@ void oscEvent(OscMessage theOscMessage) {
     //notes[pc].isFinished=true;
     //println(pc);
     }
+  if (theOscMessage.checkAddrPattern("/camON"))
+  {
+    camOn = theOscMessage.get(0).floatValue() == 1;
+    print(camOn);
+    //notes[pc].isFinished=true;
+    //println(pc);
+    }
+  if (theOscMessage.checkAddrPattern("/radio"))
+  {
+    radio = theOscMessage.get(0).floatValue();
+    
+    //notes[pc].isFinished=true;
+    //println(pc);
+    }
+   
+  if (theOscMessage.checkAddrPattern("/angle_offset"))
+  {
+    angle_offset = theOscMessage.get(0).floatValue();
+    
+    //notes[pc].isFinished=true;
+    //println(pc);
+    }
+    
+  if (theOscMessage.checkAddrPattern("/viscosity"))
+  {
+    viscosity = theOscMessage.get(0).floatValue();
+    
+    //notes[pc].isFinished=true;
+    //println(pc);
+    }
+    
+  if (theOscMessage.checkAddrPattern("/diffusion"))
+  {
+    diffusion = theOscMessage.get(0).floatValue();
+    
+    //notes[pc].isFinished=true;
+    //println(pc);
+    }
     
 }
 
@@ -140,5 +230,5 @@ void receive(byte[] data, String ip, int port){
     oscillator.stop();
   }
   
-   //<>// //<>//
+   //<>//
 }

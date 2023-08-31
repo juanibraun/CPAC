@@ -78,11 +78,11 @@ m = MIDIOut.new(0);
 (
 r = Routine({
 	{
-		[20,25,35,37,49,51,35,56,58,63,66,73,80,127].do{
+		[25,32,27,34,29,36,31,26,33,28,35,30].do{
 			arg nn;
-			m.noteOn(0,nn,nn);
+			m.noteOn(0,nn,2*nn);
 			0.2.wait;
-			m.noteOff(0,nn,nn);
+			m.noteOff(0,nn,*nn);
 			0.2.wait;
 		};
 	}.loop;
@@ -93,7 +93,7 @@ r = Routine({
 (
 t = Routine({
 	{
-		[95].do{
+		[24].do{
 			arg nn;
 			m.noteOn(0,nn,nn);
 			1.wait;
@@ -117,7 +117,8 @@ t.stop;
 b = NetAddr.new("127.0.0.1", 7771);    // create the NetAddr
 b.sendMsg("/hello", "there");
 
-
+o = OSCFunc({ arg msg, time, addr, recvPort; [msg, time, addr, recvPort].postln; }, '/goodbye', n);
+o.free;    // remove the OSCFunc when you are done.
 
 
 
